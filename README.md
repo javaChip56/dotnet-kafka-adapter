@@ -156,6 +156,46 @@ The sample app:
 - publishes one `OrderSubmitted` message
 - logs the consumed message and stops the host
 
+## NuGet Packaging
+
+The adapter library can be packed from [src/DotNetKafkaAdapter](D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter).
+
+Create a package locally with:
+
+```bash
+dotnet pack src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj -c Release -o artifacts/packages
+```
+
+To set an explicit package version at pack time:
+
+```bash
+dotnet pack src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj -c Release -o artifacts/packages /p:Version=0.1.0
+```
+
+The generated `.nupkg` file will be written to `artifacts/packages`.
+
+Before publishing to `nuget.org`, add package metadata to [DotNetKafkaAdapter.csproj](D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\DotNetKafkaAdapter.csproj) such as:
+
+- `PackageId`
+- `Version`
+- `Authors`
+- `Description`
+- `PackageTags`
+- `RepositoryUrl`
+- `PackageReadmeFile`
+
+Push a built package with:
+
+```bash
+dotnet nuget push artifacts/packages/DotNetKafkaAdapter.<version>.nupkg --source https://api.nuget.org/v3/index.json --api-key <your-api-key>
+```
+
+If you want symbol packages as well, include them when packing:
+
+```bash
+dotnet pack src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj -c Release -o artifacts/packages /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg
+```
+
 ## Usage
 
 Typical registration in an application:

@@ -34,7 +34,7 @@ The first version does not need to solve everything:
 
 ## Status
 
-This repository now contains the initial solution scaffold, public contracts, producer and consumer implementations, DI registration, typed handler registration helpers, and first-pass retry/dead-letter behavior.
+This repository now contains the initial solution scaffold, public contracts, producer and consumer implementations, DI registration, typed handler registration helpers, retry/dead-letter behavior, and live integration tests against a local Kafka broker.
 
 ## Checklist
 
@@ -58,10 +58,10 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Decided the initial offset commit strategy and failure semantics
 - [x] Added retry behavior and dead-letter strategy
 - [x] Added local development setup for Kafka
+- [x] Added integration tests against a local Kafka instance
 
 ### To Do
 
-- [ ] Add integration tests against a local Kafka instance
 - [ ] Add sample application showing publish/consume usage
 - [ ] Add usage documentation and configuration examples
 
@@ -103,6 +103,14 @@ docker compose -f docker-compose.kafka.yml down -v
 - This uses a single broker in KRaft combined mode for local development only.
 - The adapter should use `localhost:9092` as `BootstrapServers` when running on the host machine.
 
+## Integration Tests
+
+Run the Kafka integration tests against the local broker with:
+
+```bash
+dotnet test tests/DotNetKafkaAdapter.IntegrationTests/DotNetKafkaAdapter.IntegrationTests.csproj
+```
+
 ## Next Step
 
-Add integration tests, a sample application, and usage examples.
+Add a sample application and usage examples.

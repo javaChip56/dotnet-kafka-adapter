@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8DE5EA59-300
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetKafkaAdapter", "src\DotNetKafkaAdapter\DotNetKafkaAdapter.csproj", "{F19F15F9-AE34-426E-BDD2-32A17A3A2A62}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{13E0B726-F621-43AD-A70C-DA8EE334F0DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetKafkaAdapter.IntegrationTests", "tests\DotNetKafkaAdapter.IntegrationTests\DotNetKafkaAdapter.IntegrationTests.csproj", "{794B66D4-6CDA-4A33-892D-56CB050532D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{F19F15F9-AE34-426E-BDD2-32A17A3A2A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F19F15F9-AE34-426E-BDD2-32A17A3A2A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F19F15F9-AE34-426E-BDD2-32A17A3A2A62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{794B66D4-6CDA-4A33-892D-56CB050532D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{794B66D4-6CDA-4A33-892D-56CB050532D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{794B66D4-6CDA-4A33-892D-56CB050532D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{794B66D4-6CDA-4A33-892D-56CB050532D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F19F15F9-AE34-426E-BDD2-32A17A3A2A62} = {8DE5EA59-3002-4FD8-AA2C-3899EE43A344}
+		{794B66D4-6CDA-4A33-892D-56CB050532D3} = {13E0B726-F621-43AD-A70C-DA8EE334F0DF}
 	EndGlobalSection
 EndGlobal

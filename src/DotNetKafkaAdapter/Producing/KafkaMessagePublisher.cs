@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using Confluent.Kafka;
 using DotNetKafkaAdapter.Abstractions;
 using DotNetKafkaAdapter.Configuration;
@@ -18,6 +19,7 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly bool _ownsProducer;
     private readonly ILogger<KafkaMessagePublisher>? _logger;
+    private int _disposed;
 
     public KafkaMessagePublisher(
         KafkaAdapterOptions options,
@@ -103,13 +105,28 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
 
     public void Dispose()
     {
-        if (!_ownsProducer)
+        if (!_ownsProducer || Interlocked.Exchange(ref _disposed, 1) == 1)
         {
             return;
         }
 
-        _producer.Flush(TimeSpan.FromSeconds(10));
-        _producer.Dispose();
+        try
+        {
+            _producer.Flush(TimeSpan.FromSeconds(10));
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        finally
+        {
+            try
+            {
+                _producer.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+        }
     }
 
     private KafkaMessagePublisher(

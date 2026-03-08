@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "RGrcD8KsEu8=",
+  "dgSpecHash": "CC20LNkAgcE=",
   "success": true,
   "projectFilePath": "D:\\Research\\dotnet-kafka-adapter\\samples\\DotNetKafkaAdapter.SampleApp\\DotNetKafkaAdapter.SampleApp.csproj",
   "expectedPackageFiles": [
@@ -37,7 +37,8 @@
     "C:\\Users\\Button\\.nuget\\packages\\system.diagnostics.eventlog\\10.0.3\\system.diagnostics.eventlog.10.0.3.nupkg.sha512",
     "C:\\Users\\Button\\.nuget\\packages\\system.io.pipelines\\10.0.3\\system.io.pipelines.10.0.3.nupkg.sha512",
     "C:\\Users\\Button\\.nuget\\packages\\system.text.encodings.web\\10.0.3\\system.text.encodings.web.10.0.3.nupkg.sha512",
-    "C:\\Users\\Button\\.nuget\\packages\\system.text.json\\10.0.3\\system.text.json.10.0.3.nupkg.sha512"
+    "C:\\Users\\Button\\.nuget\\packages\\system.text.json\\10.0.3\\system.text.json.10.0.3.nupkg.sha512",
+    "C:\\Users\\Button\\.nuget\\packages\\dotnetkafkaadapter\\0.1.0\\dotnetkafkaadapter.0.1.0.nupkg.sha512"
   ],
   "logs": []
 }

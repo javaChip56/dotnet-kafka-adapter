@@ -4,6 +4,7 @@ using System.Threading;
 using Confluent.Kafka;
 using DotNetKafkaAdapter.Abstractions;
 using DotNetKafkaAdapter.Configuration;
+using DotNetKafkaAdapter.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetKafkaAdapter.Producing;
@@ -80,13 +81,17 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
             Headers = CreateHeaders(options)
         };
 
+        using var publishTimer = KafkaAdapterMetrics.TrackPublishDuration(topic);
+
         try
         {
             var deliveryResult = await _producer
                 .ProduceAsync(topic, kafkaMessage, cancellationToken)
                 .ConfigureAwait(false);
 
+            KafkaAdapterMetrics.PublishSucceeded(topic);
             _logger?.LogDebug(
+                KafkaAdapterLogEvents.PublishSucceeded,
                 "Published Kafka message to topic {Topic} partition {Partition} offset {Offset}.",
                 deliveryResult.Topic,
                 deliveryResult.Partition.Value,
@@ -94,11 +99,18 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
         }
         catch (ProduceException<string?, string> ex)
         {
+            KafkaAdapterMetrics.PublishFailed(topic);
             _logger?.LogError(
+                KafkaAdapterLogEvents.PublishFailed,
                 ex,
                 "Failed to publish Kafka message to topic {Topic}.",
                 topic);
 
+            throw;
+        }
+        catch (Exception)
+        {
+            KafkaAdapterMetrics.PublishFailed(topic);
             throw;
         }
     }

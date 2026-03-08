@@ -3,6 +3,7 @@ using System.Text.Json;
 using Confluent.Kafka;
 using DotNetKafkaAdapter.Abstractions;
 using DotNetKafkaAdapter.Configuration;
+using DotNetKafkaAdapter.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -40,7 +41,9 @@ public sealed class KafkaConsumerHostedService : BackgroundService
     {
         if (_options.Consumers.Count == 0)
         {
-            _logger.LogDebug("Kafka consumer hosted service started with no consumer registrations.");
+            _logger.LogDebug(
+                KafkaAdapterLogEvents.NoConsumerRegistrations,
+                "Kafka consumer hosted service started with no consumer registrations.");
             return Task.CompletedTask;
         }
 
@@ -58,7 +61,9 @@ public sealed class KafkaConsumerHostedService : BackgroundService
         ValidateRegistration(registration);
 
         var handlerInvoker = KafkaMessageHandlerInvoker.Create(registration);
+        KafkaAdapterMetrics.ConsumerStarted(registration.Topic, registration.ConsumerGroup);
         _logger.LogInformation(
+            KafkaAdapterLogEvents.ConsumerStarting,
             "Starting Kafka consumer for topic {Topic} with consumer group {ConsumerGroup}.",
             registration.Topic,
             registration.ConsumerGroup);
@@ -80,7 +85,9 @@ public sealed class KafkaConsumerHostedService : BackgroundService
                 }
                 catch (ConsumeException ex)
                 {
+                    KafkaAdapterMetrics.ConsumeFailed(registration.Topic, registration.ConsumerGroup);
                     _logger.LogError(
+                        KafkaAdapterLogEvents.ConsumeFailure,
                         ex,
                         "Kafka consume failure for topic {Topic} and consumer group {ConsumerGroup}.",
                         registration.Topic,
@@ -106,12 +113,14 @@ public sealed class KafkaConsumerHostedService : BackgroundService
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation(
+                KafkaAdapterLogEvents.ConsumerStopping,
                 "Stopping Kafka consumer for topic {Topic} with consumer group {ConsumerGroup}.",
                 registration.Topic,
                 registration.ConsumerGroup);
         }
         finally
         {
+            KafkaAdapterMetrics.ConsumerStopped(registration.Topic, registration.ConsumerGroup);
             consumer.Close();
         }
     }
@@ -154,7 +163,9 @@ public sealed class KafkaConsumerHostedService : BackgroundService
         }
         catch (Exception ex)
         {
+            KafkaAdapterMetrics.DeserializationFailed(registration.Topic, registration.ConsumerGroup);
             _logger.LogError(
+                KafkaAdapterLogEvents.DeserializationFailure,
                 ex,
                 "Failed to deserialize Kafka message from topic {Topic} to message type {MessageType}.",
                 registration.Topic,
@@ -183,6 +194,11 @@ public sealed class KafkaConsumerHostedService : BackgroundService
                     .InvokeAsync(scope.ServiceProvider, registration.HandlerType, context, message, stoppingToken)
                     .ConfigureAwait(false);
 
+                KafkaAdapterMetrics.MessageHandled(
+                    registration.Topic,
+                    registration.ConsumerGroup,
+                    registration.HandlerType.FullName ?? registration.HandlerType.Name);
+
                 if (!registration.AutoCommit)
                 {
                     CommitConsumedMessage(consumer, consumeResult, registration);
@@ -193,8 +209,13 @@ public sealed class KafkaConsumerHostedService : BackgroundService
             catch (Exception ex) when (retryAttempt < registration.MaxRetryAttempts)
             {
                 var delay = CalculateRetryDelay(registration.RetryDelay, retryAttempt + 1);
+                KafkaAdapterMetrics.RetryAttempted(
+                    registration.Topic,
+                    registration.ConsumerGroup,
+                    registration.HandlerType.FullName ?? registration.HandlerType.Name);
 
                 _logger.LogWarning(
+                    KafkaAdapterLogEvents.HandlerRetry,
                     ex,
                     "Kafka handler {HandlerType} failed for topic {Topic}. Retrying attempt {RetryAttempt} of {MaxRetryAttempts} after {Delay}.",
                     registration.HandlerType.FullName,
@@ -210,7 +231,12 @@ public sealed class KafkaConsumerHostedService : BackgroundService
             }
             catch (Exception ex)
             {
+                KafkaAdapterMetrics.HandlerFailed(
+                    registration.Topic,
+                    registration.ConsumerGroup,
+                    registration.HandlerType.FullName ?? registration.HandlerType.Name);
                 _logger.LogError(
+                    KafkaAdapterLogEvents.HandlerFailure,
                     ex,
                     "Kafka handler {HandlerType} failed for topic {Topic} after {AttemptCount} attempts.",
                     registration.HandlerType.FullName,
@@ -266,6 +292,7 @@ public sealed class KafkaConsumerHostedService : BackgroundService
                 DateTimeOffset.UtcNow);
 
             _logger.LogWarning(
+                KafkaAdapterLogEvents.DeadLetterPublish,
                 exception,
                 "Publishing Kafka message from topic {Topic} to dead-letter topic {DeadLetterTopic} after failure in stage {Stage}.",
                 registration.Topic,
@@ -284,12 +311,18 @@ public sealed class KafkaConsumerHostedService : BackgroundService
                     cancellationToken)
                 .ConfigureAwait(false);
 
+            KafkaAdapterMetrics.DeadLetterPublished(
+                registration.Topic,
+                registration.ConsumerGroup,
+                registration.DeadLetterTopic,
+                stage);
             CommitConsumedMessage(consumer, consumeResult, registration, forceCommit: true);
 
             return true;
         }
 
         _logger.LogCritical(
+            KafkaAdapterLogEvents.TerminalFailure,
             exception,
             "Kafka consumer for topic {Topic} is stopping after a terminal failure in stage {Stage}. No dead-letter topic is configured.",
             registration.Topic,
@@ -315,7 +348,9 @@ public sealed class KafkaConsumerHostedService : BackgroundService
         }
         catch (KafkaException ex)
         {
+            KafkaAdapterMetrics.OffsetCommitFailed(registration.Topic, registration.ConsumerGroup);
             _logger.LogError(
+                KafkaAdapterLogEvents.OffsetCommitFailure,
                 ex,
                 "Failed to commit Kafka offset for topic {Topic}, partition {Partition}, offset {Offset}.",
                 consumeResult.Topic,

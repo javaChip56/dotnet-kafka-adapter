@@ -71,6 +71,7 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added MIT license metadata for NuGet publication
 - [x] Added GitHub Actions release automation for GitHub Releases and NuGet publishing
 - [x] Split build/test CI from release automation into separate workflows
+- [x] Added fail-fast options validation and built-in metrics for observability
 
 ### To Do
 
@@ -522,6 +523,53 @@ For higher-volume recovery, prefer a separate replay worker that:
 - writes an audit log of what was replayed and why
 
 The current adapter intentionally does not include built-in replay automation. That keeps the core library small and avoids baking operational policy into the transport layer.
+
+## API Stability
+
+The adapter now validates configuration at startup through the .NET options pipeline, so invalid broker, security, producer, or consumer settings fail fast during host startup instead of surfacing later inside background tasks.
+
+Current stability guardrails:
+
+- `BootstrapServers` must be configured
+- SASL username and password are required for SASL protocols
+- consumer topic, consumer group, message type, and handler type must be configured
+- retry counts must be zero or greater
+- configured topic values cannot be whitespace
+
+The intent is to keep the public surface small and predictable while catching invalid registrations before runtime traffic begins.
+
+## Metrics
+
+The adapter emits built-in metrics through the .NET `Meter` named `DotNetKafkaAdapter`. The stable names live in [KafkaAdapterInstrumentation.cs](D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\Diagnostics\KafkaAdapterInstrumentation.cs).
+
+Current instruments include:
+
+- `dotnet_kafka_adapter.messages.published`
+- `dotnet_kafka_adapter.publish.failures`
+- `dotnet_kafka_adapter.publish.duration`
+- `dotnet_kafka_adapter.messages.handled`
+- `dotnet_kafka_adapter.consume.failures`
+- `dotnet_kafka_adapter.deserialization.failures`
+- `dotnet_kafka_adapter.handler.failures`
+- `dotnet_kafka_adapter.retry.attempts`
+- `dotnet_kafka_adapter.dead_letter.published`
+- `dotnet_kafka_adapter.offset_commit.failures`
+- `dotnet_kafka_adapter.consumers.active`
+
+The metrics use lightweight tags such as:
+
+- `topic`
+- `consumer_group`
+- `handler`
+- `dead_letter_topic`
+- `stage`
+
+If you are using OpenTelemetry in an application, add the meter with:
+
+```csharp
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics => metrics.AddMeter("DotNetKafkaAdapter"));
+```
 
 ## Next Step
 

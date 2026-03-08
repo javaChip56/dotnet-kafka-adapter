@@ -4,12 +4,14 @@
     <id>DotNetKafkaAdapter</id>
     <version>0.1.0</version>
     <authors>DotNetKafkaAdapter Contributors</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <readme>README.md</readme>
     <projectUrl>https://github.com/javaChip56/dotnet-kafka-adapter</projectUrl>
     <description>Lightweight .NET Kafka adapter for typed publishing and consuming with DI-friendly abstractions, JSON serialization, retry handling, and optional TLS support.</description>
     <releaseNotes>Initial release with typed producer and consumer adapters, DI registration, retry and DLQ support, local Kafka development setup, and plaintext plus TLS integration tests.</releaseNotes>
     <tags>kafka dotnet messaging events integration</tags>
-    <repository type="git" url="https://github.com/javaChip56/dotnet-kafka-adapter" branch="refs/heads/master" commit="97f1be0ad1e9d0cdf070bc24ee49dd551863f606" />
+    <repository type="git" url="https://github.com/javaChip56/dotnet-kafka-adapter" branch="refs/heads/master" commit="e33bdd345463b2a1e0112dd8e026bbf8221e6223" />
     <dependencies>
       <group targetFramework="net8.0">
         <dependency id="Confluent.Kafka" version="2.13.2" exclude="Build,Analyzers" />

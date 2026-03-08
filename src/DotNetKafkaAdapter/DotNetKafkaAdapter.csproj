@@ -12,6 +12,7 @@
     <PackageTags>kafka;dotnet;messaging;events;integration</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/javaChip56/dotnet-kafka-adapter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/javaChip56/dotnet-kafka-adapter</PackageProjectUrl>

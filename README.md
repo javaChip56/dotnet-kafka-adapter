@@ -68,10 +68,11 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added initial NuGet package metadata and pack/push instructions
 - [x] Refined public-release package metadata
 - [x] Added operational guidance for monitoring, replay, and dead-letter reprocessing
+- [x] Added MIT license metadata for NuGet publication
 
 ### To Do
 
-- [ ] Decide whether to add a license file and explicit NuGet license metadata before public publication
+- [ ] Decide whether to add CI or release automation for package publication
 
 ## Proposed Deliverables
 
@@ -186,7 +187,7 @@ The package metadata is defined in [DotNetKafkaAdapter.csproj](D:\Research\dotne
 
 - `Version`
 - `Authors`
-- license metadata appropriate for your release target
+- release automation and publishing workflow
 
 Push a built package with:
 

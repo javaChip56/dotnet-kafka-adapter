@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute(("Lightweight .NET Kafka adapter for typed publishing and consuming with DI-friendl" +
     "y abstractions, JSON serialization, retry handling, and optional TLS support."))]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("0.1.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.1.0+97f1be0ad1e9d0cdf070bc24ee49dd551863f606")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.1.0+e33bdd345463b2a1e0112dd8e026bbf8221e6223")]
 [assembly: System.Reflection.AssemblyProductAttribute("DotNetKafkaAdapter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DotNetKafkaAdapter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("0.1.0.0")]

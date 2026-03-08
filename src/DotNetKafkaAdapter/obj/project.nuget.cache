@@ -1,11 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "kQ5F7GZ4cVE=",
+  "dgSpecHash": "vt+9b4f/wOU=",
   "success": true,
   "projectFilePath": "D:\\Research\\dotnet-kafka-adapter\\src\\DotNetKafkaAdapter\\DotNetKafkaAdapter.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Button\\.nuget\\packages\\confluent.kafka\\2.13.2\\confluent.kafka.2.13.2.nupkg.sha512",
-    "C:\\Users\\Button\\.nuget\\packages\\librdkafka.redist\\2.13.2\\librdkafka.redist.2.13.2.nupkg.sha512"
+    "C:\\Users\\Button\\.nuget\\packages\\librdkafka.redist\\2.13.2\\librdkafka.redist.2.13.2.nupkg.sha512",
+    "C:\\Users\\Button\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.3\\microsoft.extensions.dependencyinjection.abstractions.10.0.3.nupkg.sha512",
+    "C:\\Users\\Button\\.nuget\\packages\\microsoft.extensions.options\\10.0.3\\microsoft.extensions.options.10.0.3.nupkg.sha512",
+    "C:\\Users\\Button\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.3\\microsoft.extensions.primitives.10.0.3.nupkg.sha512"
   ],
   "logs": []
 }

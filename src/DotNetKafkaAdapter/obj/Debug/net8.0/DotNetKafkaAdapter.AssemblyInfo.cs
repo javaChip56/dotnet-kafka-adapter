@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DotNetKafkaAdapter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bddbf1462be375dabafca3323cb698d9720f1baf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e12f1543f71e8448df4238deb9c935b6fe0b439")]
 [assembly: System.Reflection.AssemblyProductAttribute("DotNetKafkaAdapter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DotNetKafkaAdapter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

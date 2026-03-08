@@ -1,0 +1,54 @@
+using System.Text.Json;
+using DotNetKafkaAdapter.Abstractions;
+using DotNetKafkaAdapter.Configuration;
+using DotNetKafkaAdapter.Producing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class KafkaAdapterServiceCollectionExtensions
+{
+    public static IServiceCollection AddKafkaAdapter(
+        this IServiceCollection services,
+        Action<KafkaAdapterOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        services.AddOptions<KafkaAdapterOptions>().Configure(configure);
+        services.TryAddSingleton(sp => sp.GetRequiredService<IOptions<KafkaAdapterOptions>>().Value);
+
+        return services.AddKafkaPublisher();
+    }
+
+    public static IServiceCollection AddKafkaAdapter(
+        this IServiceCollection services,
+        KafkaAdapterOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(options);
+
+        services.AddOptions();
+        services.TryAddSingleton(options);
+        services.TryAddSingleton<IOptions<KafkaAdapterOptions>>(_ => new OptionsWrapper<KafkaAdapterOptions>(options));
+
+        return services.AddKafkaPublisher();
+    }
+
+    private static IServiceCollection AddKafkaPublisher(this IServiceCollection services)
+    {
+        services.TryAddSingleton<KafkaMessagePublisher>(sp =>
+        {
+            var options = sp.GetRequiredService<KafkaAdapterOptions>();
+            var serializerOptions = sp.GetService<JsonSerializerOptions>();
+
+            return new KafkaMessagePublisher(options, serializerOptions);
+        });
+
+        services.TryAddSingleton<IMessagePublisher>(sp => sp.GetRequiredService<KafkaMessagePublisher>());
+
+        return services;
+    }
+}

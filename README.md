@@ -75,6 +75,10 @@ This repository now contains the initial solution scaffold, public contracts, pr
 
 ### To Do
 
+- [ ] Add XML documentation for the public API surface
+- [ ] Add health checks for producer readiness and consumer loop state
+- [ ] Expand validation for duplicate consumer registrations and stricter config combinations
+- [ ] Add integration tests for startup validation and additional failure modes
 - [ ] Decide whether to refactor shared GitHub Actions steps into a reusable workflow or composite action
 
 ## Proposed Deliverables
@@ -573,4 +577,4 @@ builder.Services.AddOpenTelemetry()
 
 ## Next Step
 
-Decide how far to take production hardening, especially packaging and advanced broker security support.
+The next practical hardening steps are health checks, public API documentation, and deeper validation and failure-mode test coverage.

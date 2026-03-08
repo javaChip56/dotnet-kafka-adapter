@@ -64,6 +64,7 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Narrowed the handler registration API to consumer-facing options
 - [x] Added production-oriented failure and authentication guidance
 - [x] Added optional certificate-based TLS broker security settings
+- [x] Added a TLS-enabled local Kafka integration test path
 
 ### To Do
 
@@ -115,6 +116,21 @@ Run the Kafka integration tests against the local broker with:
 ```bash
 dotnet test tests/DotNetKafkaAdapter.IntegrationTests/DotNetKafkaAdapter.IntegrationTests.csproj
 ```
+
+To run the TLS integration test as well:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/generate-kafka-tls-certs.ps1
+docker compose -f docker-compose.kafka.tls.yml up -d
+dotnet test tests/DotNetKafkaAdapter.IntegrationTests/DotNetKafkaAdapter.IntegrationTests.csproj
+```
+
+The TLS broker listens on `localhost:9093` and requires:
+
+- server certificate validation against the generated local CA
+- client certificate authentication with the generated client certificate and private key
+
+The TLS-specific test is skipped automatically if the generated certificate assets are not present.
 
 ## Sample App
 

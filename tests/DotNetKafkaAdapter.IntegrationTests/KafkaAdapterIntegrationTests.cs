@@ -8,12 +8,15 @@ using DotNetKafkaAdapter.Consuming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SecurityProtocol = Confluent.Kafka.SecurityProtocol;
+using SslEndpointIdentificationAlgorithm = Confluent.Kafka.SslEndpointIdentificationAlgorithm;
 
 namespace DotNetKafkaAdapter.IntegrationTests;
 
 public sealed class KafkaAdapterIntegrationTests
 {
-    private const string BootstrapServers = "localhost:9092";
+    private static readonly KafkaTestBrokerSettings PlaintextBroker = KafkaTestBrokerSettings.Plaintext();
+    private static readonly KafkaTestBrokerSettings TlsBroker = KafkaTestBrokerSettings.Tls();
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     [Fact]
@@ -125,9 +128,7 @@ public sealed class KafkaAdapterIntegrationTests
             {
                 services.AddKafkaAdapter(options =>
                 {
-                    options.BootstrapServers = BootstrapServers;
-                    options.ClientId = $"integration-tests-{Guid.NewGuid():N}";
-                    options.Producer.DefaultTopic = defaultTopic;
+                    ApplyBrokerSettings(options, PlaintextBroker, defaultTopic);
                 });
 
                 configureServices(services);
@@ -135,14 +136,55 @@ public sealed class KafkaAdapterIntegrationTests
             .Build();
     }
 
-    private static async Task EnsureTopicsExistAsync(params string[] topics)
+    [TlsKafkaFact]
+    public async Task PublishAsync_ShouldDeliverMessageOverTlsWithClientCertificates()
     {
-        await WaitForBrokerAsync();
+        var topic = CreateTopicName("tls-publish-consume");
+        var consumerGroup = CreateConsumerGroup("tls-publish-consume");
 
-        using var adminClient = new AdminClientBuilder(new AdminClientConfig
-        {
-            BootstrapServers = BootstrapServers
-        }).Build();
+        await EnsureTopicsExistAsync(TlsBroker, topic);
+
+        var sink = new MessageSink<TestMessage>();
+
+        using var host = CreateTlsHost(
+            topic,
+            services =>
+            {
+                services.AddSingleton(sink);
+                services.AddKafkaHandler<TestMessage, RecordingMessageHandler>(topic, consumerGroup);
+            });
+
+        await host.StartAsync();
+
+        var publisher = host.Services.GetRequiredService<IMessagePublisher>();
+        var message = new TestMessage(Guid.NewGuid().ToString("N"), "hello from tls integration test");
+
+        await publisher.PublishAsync(
+            topic,
+            message,
+            new PublishOptions
+            {
+                Key = message.Id,
+                MessageId = message.Id
+            });
+
+        var received = await sink.WaitForMessageAsync(TimeSpan.FromSeconds(30));
+
+        Assert.NotNull(received);
+        Assert.Equal(message.Id, received.Id);
+        Assert.Equal(message.Value, received.Value);
+
+        await host.StopAsync();
+    }
+
+    private static async Task EnsureTopicsExistAsync(params string[] topics)
+        => await EnsureTopicsExistAsync(PlaintextBroker, topics);
+
+    private static async Task EnsureTopicsExistAsync(KafkaTestBrokerSettings broker, params string[] topics)
+    {
+        await WaitForBrokerAsync(broker);
+
+        using var adminClient = new AdminClientBuilder(CreateAdminClientConfig(broker)).Build();
 
         try
         {
@@ -159,12 +201,9 @@ public sealed class KafkaAdapterIntegrationTests
         }
     }
 
-    private static async Task WaitForBrokerAsync()
+    private static async Task WaitForBrokerAsync(KafkaTestBrokerSettings broker)
     {
-        using var adminClient = new AdminClientBuilder(new AdminClientConfig
-        {
-            BootstrapServers = BootstrapServers
-        }).Build();
+        using var adminClient = new AdminClientBuilder(CreateAdminClientConfig(broker)).Build();
 
         var timeoutAt = DateTimeOffset.UtcNow.AddSeconds(30);
 
@@ -185,7 +224,7 @@ public sealed class KafkaAdapterIntegrationTests
             await Task.Delay(500);
         }
 
-        throw new TimeoutException("Kafka broker at localhost:9092 did not become ready in time.");
+        throw new TimeoutException($"Kafka broker at {broker.BootstrapServers} did not become ready in time.");
     }
 
     private static Task<string> ConsumeSingleMessageAsync(string topic, string consumerGroup)
@@ -193,7 +232,7 @@ public sealed class KafkaAdapterIntegrationTests
         using var consumer = new ConsumerBuilder<string?, string>(
             new ConsumerConfig
             {
-                BootstrapServers = BootstrapServers,
+                BootstrapServers = PlaintextBroker.BootstrapServers,
                 GroupId = consumerGroup,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false
@@ -224,6 +263,70 @@ public sealed class KafkaAdapterIntegrationTests
 
     private static string CreateConsumerGroup(string prefix)
         => $"dotnet-kafka-adapter-{prefix}-{Guid.NewGuid():N}";
+
+    private static IHost CreateTlsHost(string defaultTopic, Action<IServiceCollection> configureServices)
+    {
+        return Host.CreateDefaultBuilder()
+            .ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddSimpleConsole(options => options.SingleLine = true);
+                logging.SetMinimumLevel(LogLevel.Warning);
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddKafkaAdapter(options =>
+                {
+                    ApplyBrokerSettings(options, TlsBroker, defaultTopic);
+                });
+
+                configureServices(services);
+            })
+            .Build();
+    }
+
+    private static void ApplyBrokerSettings(
+        KafkaAdapterOptions options,
+        KafkaTestBrokerSettings broker,
+        string defaultTopic)
+    {
+        options.BootstrapServers = broker.BootstrapServers;
+        options.ClientId = $"integration-tests-{Guid.NewGuid():N}";
+        options.Producer.DefaultTopic = defaultTopic;
+
+        if (!broker.UseTls)
+        {
+            return;
+        }
+
+        options.Security.Protocol = KafkaSecurityProtocol.Ssl;
+        options.Security.SslCaLocation = broker.CaCertificatePath;
+        options.Security.SslCertificateLocation = broker.ClientCertificatePath;
+        options.Security.SslKeyLocation = broker.ClientKeyPath;
+        options.Security.EnableSslCertificateVerification = true;
+        options.Security.SslEndpointIdentificationAlgorithm = KafkaSslEndpointIdentificationAlgorithm.Https;
+    }
+
+    private static AdminClientConfig CreateAdminClientConfig(KafkaTestBrokerSettings broker)
+    {
+        var config = new AdminClientConfig
+        {
+            BootstrapServers = broker.BootstrapServers
+        };
+
+        if (!broker.UseTls)
+        {
+            return config;
+        }
+
+        config.SecurityProtocol = SecurityProtocol.Ssl;
+        config.SslCaLocation = broker.CaCertificatePath;
+        config.SslCertificateLocation = broker.ClientCertificatePath;
+        config.SslKeyLocation = broker.ClientKeyPath;
+        config.EnableSslCertificateVerification = true;
+        config.SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.Https;
+        return config;
+    }
 
     private sealed record TestMessage(string Id, string Value);
 
@@ -280,6 +383,29 @@ public sealed class KafkaAdapterIntegrationTests
         public void Increment()
         {
             Interlocked.Increment(ref _value);
+        }
+    }
+
+    private sealed record KafkaTestBrokerSettings(
+        string BootstrapServers,
+        bool UseTls,
+        string? CaCertificatePath = null,
+        string? ClientCertificatePath = null,
+        string? ClientKeyPath = null)
+    {
+        public static KafkaTestBrokerSettings Plaintext()
+            => new("localhost:9092", false);
+
+        public static KafkaTestBrokerSettings Tls()
+        {
+            var certDirectory = KafkaTestAssetPaths.GetTlsCertificateDirectory();
+
+            return new KafkaTestBrokerSettings(
+                "localhost:9093",
+                true,
+                Path.Combine(certDirectory, "ca.pem"),
+                Path.Combine(certDirectory, "client.crt"),
+                Path.Combine(certDirectory, "client.key"));
         }
     }
 }

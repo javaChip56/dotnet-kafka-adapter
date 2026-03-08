@@ -1,0 +1,2 @@
+dev/kafka-tls/certs/*
+!dev/kafka-tls/certs/.gitkeep

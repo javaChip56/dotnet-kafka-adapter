@@ -34,7 +34,7 @@ The first version does not need to solve everything:
 
 ## Status
 
-This repository is at the project bootstrap stage. No implementation exists yet.
+This repository now contains the initial solution scaffold and public contracts. Kafka client implementation has not been added yet.
 
 ## Checklist
 
@@ -43,14 +43,14 @@ This repository is at the project bootstrap stage. No implementation exists yet.
 - [x] Confirmed the library is technically feasible as a lightweight .NET adapter over Kafka
 - [x] Defined the high-level goal and initial project scope
 - [x] Created the initial project README
+- [x] Created the .NET solution and class library structure
+- [x] Chosen the initial target framework (`net8.0`)
+- [x] Defined the first-pass public abstractions for publishing and consuming
+- [x] Defined the first-pass configuration model for brokers, topics, auth, and consumer groups
 
 ### To Do
 
-- [ ] Create the .NET solution and class library structure
-- [ ] Choose target framework(s)
 - [ ] Add Kafka client dependency (`Confluent.Kafka`)
-- [ ] Define core abstractions for publishing and consuming
-- [ ] Define configuration model for brokers, topics, auth, and consumer groups
 - [ ] Implement producer wrapper for typed messages
 - [ ] Implement consumer worker pattern for typed handlers
 - [ ] Add JSON serializer/deserializer support
@@ -74,4 +74,4 @@ The likely shape of the library:
 
 ## Next Step
 
-Create the solution structure and define the public interfaces before writing Kafka-specific implementation code.
+Add the Kafka client package and start implementing the producer wrapper against the current abstractions.

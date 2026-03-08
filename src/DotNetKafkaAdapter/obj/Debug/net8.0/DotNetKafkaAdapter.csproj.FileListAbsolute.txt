@@ -1,0 +1,12 @@
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\bin\Debug\net8.0\DotNetKafkaAdapter.deps.json
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\bin\Debug\net8.0\DotNetKafkaAdapter.dll
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\bin\Debug\net8.0\DotNetKafkaAdapter.pdb
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.GeneratedMSBuildEditorConfig.editorconfig
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.AssemblyInfoInputs.cache
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.AssemblyInfo.cs
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.csproj.CoreCompileInputs.cache
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.sourcelink.json
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.dll
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\refint\DotNetKafkaAdapter.dll
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.pdb
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\ref\DotNetKafkaAdapter.dll

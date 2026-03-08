@@ -34,7 +34,7 @@ The first version does not need to solve everything:
 
 ## Status
 
-This repository now contains the initial solution scaffold, public contracts, a first-pass Kafka producer implementation, DI registration, and a hosted consumer worker path for typed handlers.
+This repository now contains the initial solution scaffold, public contracts, producer and consumer implementations, DI registration, typed handler registration helpers, and first-pass retry/dead-letter behavior.
 
 ## Checklist
 
@@ -53,12 +53,13 @@ This repository now contains the initial solution scaffold, public contracts, a 
 - [x] Added DI registration extensions for the producer and consumer paths
 - [x] Implemented the consumer worker pattern for typed handlers
 - [x] Added JSON deserialization support for consumers
+- [x] Added typed handler registration helpers for consuming apps
+- [x] Added structured logging around produce/consume failures
+- [x] Decided the initial offset commit strategy and failure semantics
+- [x] Added retry behavior and dead-letter strategy
 
 ### To Do
 
-- [ ] Add structured logging around produce/consume failures
-- [ ] Decide offset commit strategy and failure semantics
-- [ ] Add retry behavior and dead-letter strategy
 - [ ] Add local development setup for Kafka
 - [ ] Add integration tests against a local Kafka instance
 - [ ] Add sample application showing publish/consume usage
@@ -75,4 +76,4 @@ The likely shape of the library:
 
 ## Next Step
 
-Add structured logging and tighten failure/offset handling semantics.
+Add local Kafka development setup, integration tests, and usage examples.

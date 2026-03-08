@@ -3,6 +3,7 @@ using System.Text.Json;
 using Confluent.Kafka;
 using DotNetKafkaAdapter.Abstractions;
 using DotNetKafkaAdapter.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetKafkaAdapter.Producing;
 
@@ -16,14 +17,17 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
     private readonly IProducer<string?, string> _producer;
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly bool _ownsProducer;
+    private readonly ILogger<KafkaMessagePublisher>? _logger;
 
     public KafkaMessagePublisher(
         KafkaAdapterOptions options,
-        JsonSerializerOptions? serializerOptions = null)
+        JsonSerializerOptions? serializerOptions = null,
+        ILogger<KafkaMessagePublisher>? logger = null)
         : this(
             CreateProducer(options),
             options,
             serializerOptions,
+            logger,
             ownsProducer: true)
     {
     }
@@ -31,11 +35,13 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
     public KafkaMessagePublisher(
         IProducer<string?, string> producer,
         KafkaAdapterOptions options,
-        JsonSerializerOptions? serializerOptions = null)
+        JsonSerializerOptions? serializerOptions = null,
+        ILogger<KafkaMessagePublisher>? logger = null)
         : this(
             producer,
             options,
             serializerOptions,
+            logger,
             ownsProducer: false)
     {
     }
@@ -72,9 +78,27 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
             Headers = CreateHeaders(options)
         };
 
-        await _producer
-            .ProduceAsync(topic, kafkaMessage, cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            var deliveryResult = await _producer
+                .ProduceAsync(topic, kafkaMessage, cancellationToken)
+                .ConfigureAwait(false);
+
+            _logger?.LogDebug(
+                "Published Kafka message to topic {Topic} partition {Partition} offset {Offset}.",
+                deliveryResult.Topic,
+                deliveryResult.Partition.Value,
+                deliveryResult.Offset.Value);
+        }
+        catch (ProduceException<string?, string> ex)
+        {
+            _logger?.LogError(
+                ex,
+                "Failed to publish Kafka message to topic {Topic}.",
+                topic);
+
+            throw;
+        }
     }
 
     public void Dispose()
@@ -92,6 +116,7 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
         IProducer<string?, string> producer,
         KafkaAdapterOptions options,
         JsonSerializerOptions? serializerOptions,
+        ILogger<KafkaMessagePublisher>? logger,
         bool ownsProducer)
     {
         ArgumentNullException.ThrowIfNull(producer);
@@ -101,6 +126,7 @@ public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
         _options = options;
         _ownsProducer = ownsProducer;
         _serializerOptions = serializerOptions ?? new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        _logger = logger;
     }
 
     private static Headers CreateHeaders(PublishOptions? options)

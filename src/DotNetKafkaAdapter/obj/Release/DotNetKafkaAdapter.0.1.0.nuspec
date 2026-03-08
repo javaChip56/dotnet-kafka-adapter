@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>DotNetKafkaAdapter</id>
+    <version>0.1.0</version>
+    <authors>DotNetKafkaAdapter Contributors</authors>
+    <readme>README.md</readme>
+    <description>Lightweight .NET Kafka adapter for typed publishing and consuming with DI-friendly abstractions, JSON serialization, retry handling, and optional TLS support.</description>
+    <tags>kafka dotnet messaging events integration</tags>
+    <repository type="git" commit="1dfd71c6f965f9ba0256e63cb3d71ff2d4a6c0e3" />
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="Confluent.Kafka" version="2.13.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="10.0.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Hosting.Abstractions" version="10.0.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options" version="10.0.3" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\bin\Release\net8.0\DotNetKafkaAdapter.dll" target="lib\net8.0\DotNetKafkaAdapter.dll" />
+    <file src="D:\Research\dotnet-kafka-adapter\README.md" target="\README.md" />
+  </files>
+</package>

@@ -65,10 +65,10 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added production-oriented failure and authentication guidance
 - [x] Added optional certificate-based TLS broker security settings
 - [x] Added a TLS-enabled local Kafka integration test path
+- [x] Added initial NuGet package metadata and pack/push instructions
 
 ### To Do
 
-- [ ] Decide on packaging/versioning strategy for NuGet distribution
 - [ ] Add more operational guidance around monitoring, replay, and dead-letter reprocessing
 
 ## Proposed Deliverables
@@ -160,6 +160,12 @@ The sample app:
 
 The adapter library can be packed from [src/DotNetKafkaAdapter](D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter).
 
+The project currently packs with:
+
+- package ID `DotNetKafkaAdapter`
+- default version `0.1.0`
+- the repository `README.md` included as the NuGet package readme
+
 Create a package locally with:
 
 ```bash
@@ -174,15 +180,13 @@ dotnet pack src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj -c Release -o artif
 
 The generated `.nupkg` file will be written to `artifacts/packages`.
 
-Before publishing to `nuget.org`, add package metadata to [DotNetKafkaAdapter.csproj](D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\DotNetKafkaAdapter.csproj) such as:
+The package metadata is defined in [DotNetKafkaAdapter.csproj](D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\DotNetKafkaAdapter.csproj). If you are preparing a public release, you will likely still want to set or refine:
 
-- `PackageId`
 - `Version`
 - `Authors`
-- `Description`
-- `PackageTags`
 - `RepositoryUrl`
-- `PackageReadmeFile`
+- `PackageProjectUrl`
+- license metadata appropriate for your release target
 
 Push a built package with:
 

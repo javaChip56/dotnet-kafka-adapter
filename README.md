@@ -70,10 +70,11 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added operational guidance for monitoring, replay, and dead-letter reprocessing
 - [x] Added MIT license metadata for NuGet publication
 - [x] Added GitHub Actions release automation for GitHub Releases and NuGet publishing
+- [x] Split build/test CI from release automation into separate workflows
 
 ### To Do
 
-- [ ] Decide whether to split build/test CI from release automation into separate workflows
+- [ ] Decide whether to refactor shared GitHub Actions steps into a reusable workflow or composite action
 
 ## Proposed Deliverables
 
@@ -202,6 +203,19 @@ If you want symbol packages as well, include them when packing:
 dotnet pack src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj -c Release -o artifacts/packages /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg
 ```
 
+## GitHub CI
+
+The repository includes a CI workflow at [.github/workflows/ci.yml](D:\Research\dotnet-kafka-adapter\.github\workflows\ci.yml).
+
+It runs on pushes to `main` or `master` and on pull requests. It will:
+
+- restore and build the solution
+- generate TLS test certificates for the TLS integration test
+- start both local Kafka Docker stacks
+- run the integration test suite
+
+This keeps routine validation separate from the release pipeline.
+
 ## GitHub Release Automation
 
 The repository includes a release workflow at [.github/workflows/release.yml](D:\Research\dotnet-kafka-adapter\.github\workflows\release.yml).
@@ -214,6 +228,8 @@ It will:
 - pack `.nupkg` and `.snupkg` artifacts
 - create a GitHub Release for the version tag
 - push the package to NuGet when the `NUGET_API_KEY` repository secret is configured
+
+The release workflow is intentionally separate from CI so package publication only happens from explicit release events.
 
 ### Triggering A Release
 

@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Restore
+        run: dotnet restore DotNetKafkaAdapter.sln
+
+      - name: Generate TLS test certificates
+        shell: pwsh
+        run: ./scripts/generate-kafka-tls-certs.ps1 -Force
+
+      - name: Start plaintext Kafka
+        run: docker compose -f docker-compose.kafka.yml up -d
+
+      - name: Start TLS Kafka
+        run: docker compose -f docker-compose.kafka.tls.yml up -d
+
+      - name: Build
+        run: dotnet build DotNetKafkaAdapter.sln --configuration Release --no-restore
+
+      - name: Run integration tests
+        run: dotnet test tests/DotNetKafkaAdapter.IntegrationTests/DotNetKafkaAdapter.IntegrationTests.csproj --configuration Release --no-build
+
+      - name: Stop Kafka stacks
+        if: always()
+        run: |
+          docker compose -f docker-compose.kafka.yml down -v
+          docker compose -f docker-compose.kafka.tls.yml down -v

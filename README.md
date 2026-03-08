@@ -63,10 +63,10 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added usage documentation and configuration examples
 - [x] Narrowed the handler registration API to consumer-facing options
 - [x] Added production-oriented failure and authentication guidance
+- [x] Added optional certificate-based TLS broker security settings
 
 ### To Do
 
-- [ ] Add richer broker security options if certificate-based TLS settings are required
 - [ ] Decide on packaging/versioning strategy for NuGet distribution
 - [ ] Add more operational guidance around monitoring, replay, and dead-letter reprocessing
 
@@ -276,10 +276,56 @@ services.AddKafkaAdapter(options =>
 });
 ```
 
+For TLS server verification with a custom CA bundle:
+
+```csharp
+services.AddKafkaAdapter(options =>
+{
+    options.BootstrapServers = "your-broker:9093";
+    options.ClientId = "my-app";
+    options.Security.Protocol = KafkaSecurityProtocol.Ssl;
+    options.Security.SslCaLocation = "/etc/certs/ca.pem";
+    options.Security.EnableSslCertificateVerification = true;
+    options.Security.SslEndpointIdentificationAlgorithm = KafkaSslEndpointIdentificationAlgorithm.Https;
+});
+```
+
+For mutual TLS with a client certificate and private key:
+
+```csharp
+services.AddKafkaAdapter(options =>
+{
+    options.BootstrapServers = "your-broker:9093";
+    options.ClientId = "my-app";
+    options.Security.Protocol = KafkaSecurityProtocol.Ssl;
+    options.Security.SslCaLocation = "/etc/certs/ca.pem";
+    options.Security.SslCertificateLocation = "/etc/certs/client.pem";
+    options.Security.SslKeyLocation = "/etc/certs/client.key";
+    options.Security.SslKeyPassword = "optional-key-password";
+});
+```
+
+Optional TLS settings currently supported:
+
+- `SslCaLocation`
+- `SslCaPem`
+- `SslCaCertificateStores`
+- `SslCertificateLocation`
+- `SslCertificatePem`
+- `SslKeyLocation`
+- `SslKeyPem`
+- `SslKeyPassword`
+- `SslKeystoreLocation`
+- `SslKeystorePassword`
+- `EnableSslCertificateVerification`
+- `SslEndpointIdentificationAlgorithm`
+
 ## Production Notes
 
 - Keep `BootstrapServers`, usernames, and passwords in configuration or secret storage rather than source code.
+- Keep certificate file paths, PEM content, and key passwords in configuration or secret storage rather than source code.
 - Use `KafkaSecurityProtocol.SaslSsl` or `KafkaSecurityProtocol.Ssl` for remote brokers unless you explicitly control a trusted plaintext network.
+- Use the TLS settings only when your broker protocol is `Ssl` or `SaslSsl`; they remain optional and are ignored for plaintext configurations.
 - Decide whether stopping a consumer loop on an unrecoverable failure is acceptable for your service model before using the current defaults in production.
 - Provision dead-letter topics explicitly and monitor them; the adapter publishes DLQ messages but does not re-drive them.
 - Integration tests in this repo validate the local broker path, not a production cluster topology.

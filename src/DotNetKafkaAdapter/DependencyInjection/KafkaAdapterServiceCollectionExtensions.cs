@@ -72,7 +72,19 @@ public static class KafkaAdapterServiceCollectionExtensions
             Protocol = source.Security.Protocol,
             SaslMechanism = source.Security.SaslMechanism,
             Username = source.Security.Username,
-            Password = source.Security.Password
+            Password = source.Security.Password,
+            SslCaLocation = source.Security.SslCaLocation,
+            SslCaPem = source.Security.SslCaPem,
+            SslCaCertificateStores = source.Security.SslCaCertificateStores,
+            SslCertificateLocation = source.Security.SslCertificateLocation,
+            SslCertificatePem = source.Security.SslCertificatePem,
+            SslKeyLocation = source.Security.SslKeyLocation,
+            SslKeyPem = source.Security.SslKeyPem,
+            SslKeyPassword = source.Security.SslKeyPassword,
+            SslKeystoreLocation = source.Security.SslKeystoreLocation,
+            SslKeystorePassword = source.Security.SslKeystorePassword,
+            EnableSslCertificateVerification = source.Security.EnableSslCertificateVerification,
+            SslEndpointIdentificationAlgorithm = source.Security.SslEndpointIdentificationAlgorithm
         };
         target.Producer = new KafkaProducerOptions
         {

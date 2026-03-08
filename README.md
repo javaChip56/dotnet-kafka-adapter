@@ -66,10 +66,12 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added optional certificate-based TLS broker security settings
 - [x] Added a TLS-enabled local Kafka integration test path
 - [x] Added initial NuGet package metadata and pack/push instructions
+- [x] Refined public-release package metadata
+- [x] Added operational guidance for monitoring, replay, and dead-letter reprocessing
 
 ### To Do
 
-- [ ] Add more operational guidance around monitoring, replay, and dead-letter reprocessing
+- [ ] Decide whether to add a license file and explicit NuGet license metadata before public publication
 
 ## Proposed Deliverables
 
@@ -184,8 +186,6 @@ The package metadata is defined in [DotNetKafkaAdapter.csproj](D:\Research\dotne
 
 - `Version`
 - `Authors`
-- `RepositoryUrl`
-- `PackageProjectUrl`
 - license metadata appropriate for your release target
 
 Push a built package with:
@@ -389,6 +389,78 @@ Optional TLS settings currently supported:
 - Decide whether stopping a consumer loop on an unrecoverable failure is acceptable for your service model before using the current defaults in production.
 - Provision dead-letter topics explicitly and monitor them; the adapter publishes DLQ messages but does not re-drive them.
 - Integration tests in this repo validate the local broker path, not a production cluster topology.
+
+## Monitoring And Operations
+
+For production operation, monitor the adapter at both the service and Kafka level.
+
+Recommended service-level signals:
+
+- publish failures from `KafkaMessagePublisher`
+- consumer loop failures from `KafkaConsumerHostedService`
+- retry attempt counts
+- dead-letter publish counts
+- dead-letter topic growth over time
+- handler processing latency
+- consumer lag for each topic and consumer group
+
+Recommended operational alerts:
+
+- any consumer loop stops unexpectedly
+- dead-letter traffic exceeds a normal baseline
+- consumer lag continues to grow for a sustained window
+- repeated deserialization failures for the same topic
+- repeated handler failures for the same message type or handler
+
+Operationally, the most important current distinction is:
+
+- deserialization failures are not retried in-process
+- handler failures are retried in-process and may be dead-lettered after retries are exhausted
+
+That means deserialization failures usually point to a producer-contract mismatch, while handler failures usually point to business logic or downstream dependency issues.
+
+## Dead-Letter Reprocessing
+
+The adapter publishes a `KafkaDeadLetterMessage` payload to the configured dead-letter topic. The message includes:
+
+- original topic
+- consumer group
+- original key and message ID
+- serialized payload
+- headers
+- partition, offset, and timestamp
+- message type and handler type
+- failure stage, error message, exception type, and attempt count
+
+Use that information to separate recovery paths:
+
+- if `FailureStage` is `deserialization`, fix the producer or schema/contract mismatch before replaying
+- if `FailureStage` is `handler`, fix the handler or downstream dependency before replaying
+- if the payload is irrecoverable, archive it and do not replay it blindly
+
+For replay, a safe default process is:
+
+1. identify the root cause and deploy the fix first
+2. inspect the DLQ payloads and filter to only the recoverable subset
+3. republish those messages to the original topic or a dedicated retry topic
+4. monitor consumer lag, retry counts, and DLQ volume during replay
+5. keep replay idempotent at the handler level, because the adapter does not guarantee exactly-once handling
+
+Avoid wiring automatic DLQ re-drive back into the same consumer path until you have explicit idempotency and replay controls in place. Otherwise a poison message can loop between the primary topic and DLQ.
+
+## Replay Strategy
+
+For low-volume recovery, manual replay with an operator-reviewed tool or script is the safest option.
+
+For higher-volume recovery, prefer a separate replay worker that:
+
+- reads from the DLQ topic
+- validates message age, failure stage, and replay eligibility
+- republishes at a controlled rate
+- tags replayed messages with a header or message attribute if you add that behavior later
+- writes an audit log of what was replayed and why
+
+The current adapter intentionally does not include built-in replay automation. That keeps the core library small and avoids baking operational policy into the transport layer.
 
 ## Next Step
 

@@ -10,3 +10,4 @@ D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetK
 D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\refint\DotNetKafkaAdapter.dll
 D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.pdb
 D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\ref\DotNetKafkaAdapter.dll
+D:\Research\dotnet-kafka-adapter\src\DotNetKafkaAdapter\obj\Debug\net8.0\DotNetKafkaAdapter.csproj.AssemblyReference.cache

@@ -34,7 +34,7 @@ The first version does not need to solve everything:
 
 ## Status
 
-This repository now contains the initial solution scaffold and public contracts. Kafka client implementation has not been added yet.
+This repository now contains the initial solution scaffold, public contracts, and a first-pass Kafka producer implementation. Consumer support and DI integration have not been added yet.
 
 ## Checklist
 
@@ -47,13 +47,14 @@ This repository now contains the initial solution scaffold and public contracts.
 - [x] Chosen the initial target framework (`net8.0`)
 - [x] Defined the first-pass public abstractions for publishing and consuming
 - [x] Defined the first-pass configuration model for brokers, topics, auth, and consumer groups
+- [x] Added the Kafka client dependency (`Confluent.Kafka`)
+- [x] Implemented the first producer wrapper for typed messages
+- [x] Added the first JSON serialization path for produced messages
 
 ### To Do
 
-- [ ] Add Kafka client dependency (`Confluent.Kafka`)
-- [ ] Implement producer wrapper for typed messages
 - [ ] Implement consumer worker pattern for typed handlers
-- [ ] Add JSON serializer/deserializer support
+- [ ] Add JSON deserialization support for consumers
 - [ ] Add DI registration extensions
 - [ ] Add structured logging around produce/consume failures
 - [ ] Decide offset commit strategy and failure semantics
@@ -74,4 +75,4 @@ The likely shape of the library:
 
 ## Next Step
 
-Add the Kafka client package and start implementing the producer wrapper against the current abstractions.
+Add DI registration and then implement the consumer worker path against the current contracts.

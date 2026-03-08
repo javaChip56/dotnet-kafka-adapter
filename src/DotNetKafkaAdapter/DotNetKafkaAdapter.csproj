@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
     <PackageId>DotNetKafkaAdapter</PackageId>
     <Version>0.1.0</Version>
-    <Authors>DotNetKafkaAdapter Contributors</Authors>
+    <Authors>DotNetKafkaAdapter Contributors (Codex+Gali)</Authors>
     <Description>Lightweight .NET Kafka adapter for typed publishing and consuming with DI-friendly abstractions, JSON serialization, retry handling, and optional TLS support.</Description>
     <PackageTags>kafka;dotnet;messaging;events;integration</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

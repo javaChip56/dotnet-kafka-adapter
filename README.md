@@ -233,7 +233,7 @@ It will:
 - start the plaintext local Kafka stack in Docker
 - pack `.nupkg` and `.snupkg` artifacts
 - create a GitHub Release for the version tag
-- push the package to NuGet when the `NUGET_API_KEY` repository secret is configured
+- push the package to NuGet when the `NUGET_API_KEY` secret is configured in the `release` GitHub Environment
 
 The release workflow is intentionally separate from CI so package publication only happens from explicit release events.
 The GitHub release workflow also sets `DOTNET_KAFKA_ADAPTER_SKIP_TLS_TESTS=true`, so TLS integration remains available locally but is excluded from GitHub-hosted runs.
@@ -252,11 +252,12 @@ You can also run it manually from GitHub Actions with:
 - `version`
 - `publish_to_nuget`
 
-### Required GitHub Secret
+### Required GitHub Environment Secret
 
-To publish to NuGet from GitHub Actions, add this repository secret:
+The release workflow targets the `release` GitHub Environment. To publish to NuGet from GitHub Actions:
 
-- `NUGET_API_KEY`
+1. Create a GitHub Environment named `release`
+2. Add an environment secret named `NUGET_API_KEY`
 
 If that secret is not present, the workflow will still build, test, pack, and create the GitHub Release, but it will skip the NuGet push step.
 

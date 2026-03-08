@@ -95,24 +95,40 @@ jobs:
           path: artifacts/packages/*
 
       - name: Push package to NuGet
-        if: >
-          (github.event_name == 'push' || github.event.inputs.publish_to_nuget == 'true')
-          && env.NUGET_API_KEY != ''
-        run: >
-          dotnet nuget push artifacts/packages/*.nupkg
-          --source https://api.nuget.org/v3/index.json
-          --api-key $NUGET_API_KEY
-          --skip-duplicate
+        shell: bash
+        run: |
+          if [ -z "${NUGET_API_KEY}" ]; then
+            echo "NUGET_API_KEY is not configured. Skipping NuGet package publish."
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.publish_to_nuget }}" != "true" ]; then
+            echo "publish_to_nuget is disabled for this manual run. Skipping NuGet package publish."
+            exit 0
+          fi
+
+          dotnet nuget push artifacts/packages/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "${NUGET_API_KEY}" \
+            --skip-duplicate
 
       - name: Push symbol package to NuGet
-        if: >
-          (github.event_name == 'push' || github.event.inputs.publish_to_nuget == 'true')
-          && env.NUGET_API_KEY != ''
-        run: >
-          dotnet nuget push artifacts/packages/*.snupkg
-          --source https://api.nuget.org/v3/index.json
-          --api-key $NUGET_API_KEY
-          --skip-duplicate
+        shell: bash
+        run: |
+          if [ -z "${NUGET_API_KEY}" ]; then
+            echo "NUGET_API_KEY is not configured. Skipping NuGet symbol package publish."
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.publish_to_nuget }}" != "true" ]; then
+            echo "publish_to_nuget is disabled for this manual run. Skipping NuGet symbol package publish."
+            exit 0
+          fi
+
+          dotnet nuget push artifacts/packages/*.snupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "${NUGET_API_KEY}" \
+            --skip-duplicate
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2

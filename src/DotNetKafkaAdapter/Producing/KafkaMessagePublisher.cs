@@ -8,9 +8,9 @@ namespace DotNetKafkaAdapter.Producing;
 
 public sealed class KafkaMessagePublisher : IMessagePublisher, IDisposable
 {
-    private const string ContentTypeHeaderName = "content-type";
+    private const string ContentTypeHeaderName = KafkaMessageHeaders.ContentType;
     private const string ContentTypeHeaderValue = "application/json";
-    private const string MessageIdHeaderName = "message-id";
+    private const string MessageIdHeaderName = KafkaMessageHeaders.MessageId;
 
     private readonly KafkaAdapterOptions _options;
     private readonly IProducer<string?, string> _producer;

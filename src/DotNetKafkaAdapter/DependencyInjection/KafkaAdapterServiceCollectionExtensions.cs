@@ -1,9 +1,11 @@
 using System.Text.Json;
 using DotNetKafkaAdapter.Abstractions;
+using DotNetKafkaAdapter.Consuming;
 using DotNetKafkaAdapter.Configuration;
 using DotNetKafkaAdapter.Producing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -20,7 +22,7 @@ public static class KafkaAdapterServiceCollectionExtensions
         services.AddOptions<KafkaAdapterOptions>().Configure(configure);
         services.TryAddSingleton(sp => sp.GetRequiredService<IOptions<KafkaAdapterOptions>>().Value);
 
-        return services.AddKafkaPublisher();
+        return services.AddKafkaAdapterServices();
     }
 
     public static IServiceCollection AddKafkaAdapter(
@@ -34,10 +36,10 @@ public static class KafkaAdapterServiceCollectionExtensions
         services.TryAddSingleton(options);
         services.TryAddSingleton<IOptions<KafkaAdapterOptions>>(_ => new OptionsWrapper<KafkaAdapterOptions>(options));
 
-        return services.AddKafkaPublisher();
+        return services.AddKafkaAdapterServices();
     }
 
-    private static IServiceCollection AddKafkaPublisher(this IServiceCollection services)
+    private static IServiceCollection AddKafkaAdapterServices(this IServiceCollection services)
     {
         services.TryAddSingleton<KafkaMessagePublisher>(sp =>
         {
@@ -48,6 +50,7 @@ public static class KafkaAdapterServiceCollectionExtensions
         });
 
         services.TryAddSingleton<IMessagePublisher>(sp => sp.GetRequiredService<KafkaMessagePublisher>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, KafkaConsumerHostedService>());
 
         return services;
     }

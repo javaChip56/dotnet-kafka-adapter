@@ -34,7 +34,7 @@ The first version does not need to solve everything:
 
 ## Status
 
-This repository now contains the initial solution scaffold, public contracts, a first-pass Kafka producer implementation, and DI registration for the publisher path. Consumer support has not been added yet.
+This repository now contains the initial solution scaffold, public contracts, a first-pass Kafka producer implementation, DI registration, and a hosted consumer worker path for typed handlers.
 
 ## Checklist
 
@@ -50,12 +50,12 @@ This repository now contains the initial solution scaffold, public contracts, a 
 - [x] Added the Kafka client dependency (`Confluent.Kafka`)
 - [x] Implemented the first producer wrapper for typed messages
 - [x] Added the first JSON serialization path for produced messages
-- [x] Added DI registration extensions for the producer path
+- [x] Added DI registration extensions for the producer and consumer paths
+- [x] Implemented the consumer worker pattern for typed handlers
+- [x] Added JSON deserialization support for consumers
 
 ### To Do
 
-- [ ] Implement consumer worker pattern for typed handlers
-- [ ] Add JSON deserialization support for consumers
 - [ ] Add structured logging around produce/consume failures
 - [ ] Decide offset commit strategy and failure semantics
 - [ ] Add retry behavior and dead-letter strategy
@@ -75,4 +75,4 @@ The likely shape of the library:
 
 ## Next Step
 
-Implement the consumer worker path against the current contracts.
+Add structured logging and tighten failure/offset handling semantics.

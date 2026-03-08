@@ -57,10 +57,10 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added structured logging around produce/consume failures
 - [x] Decided the initial offset commit strategy and failure semantics
 - [x] Added retry behavior and dead-letter strategy
+- [x] Added local development setup for Kafka
 
 ### To Do
 
-- [ ] Add local development setup for Kafka
 - [ ] Add integration tests against a local Kafka instance
 - [ ] Add sample application showing publish/consume usage
 - [ ] Add usage documentation and configuration examples
@@ -74,6 +74,35 @@ The likely shape of the library:
 - Integration tests
 - Documentation for setup and usage
 
+## Local Kafka
+
+The repository includes a single-node Kafka stack for local development in [docker-compose.kafka.yml](D:\Research\dotnet-kafka-adapter\docker-compose.kafka.yml).
+
+### Start Kafka
+
+```bash
+docker compose -f docker-compose.kafka.yml up -d
+```
+
+Kafka will be reachable from the host on `localhost:9092`.
+
+### Stop Kafka
+
+```bash
+docker compose -f docker-compose.kafka.yml down
+```
+
+To remove the Kafka data volume as well:
+
+```bash
+docker compose -f docker-compose.kafka.yml down -v
+```
+
+### Notes
+
+- This uses a single broker in KRaft combined mode for local development only.
+- The adapter should use `localhost:9092` as `BootstrapServers` when running on the host machine.
+
 ## Next Step
 
-Add local Kafka development setup, integration tests, and usage examples.
+Add integration tests, a sample application, and usage examples.

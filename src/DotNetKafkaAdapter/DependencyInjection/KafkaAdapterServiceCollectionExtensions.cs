@@ -82,18 +82,7 @@ public static class KafkaAdapterServiceCollectionExtensions
 
         foreach (var registration in source.Consumers)
         {
-            target.Consumers.Add(new KafkaConsumerRegistration
-            {
-                Topic = registration.Topic,
-                ConsumerGroup = registration.ConsumerGroup,
-                MessageType = registration.MessageType,
-                HandlerType = registration.HandlerType,
-                OffsetReset = registration.OffsetReset,
-                AutoCommit = registration.AutoCommit,
-                MaxRetryAttempts = registration.MaxRetryAttempts,
-                RetryDelay = registration.RetryDelay,
-                DeadLetterTopic = registration.DeadLetterTopic
-            });
+            target.Consumers.Add(registration.Clone());
         }
     }
 }

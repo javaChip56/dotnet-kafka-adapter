@@ -61,11 +61,14 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added integration tests against a local Kafka instance
 - [x] Added sample application showing publish/consume usage
 - [x] Added usage documentation and configuration examples
+- [x] Narrowed the handler registration API to consumer-facing options
+- [x] Added production-oriented failure and authentication guidance
 
 ### To Do
 
-- [ ] Refine the public API surface as the adapter hardens
-- [ ] Expand documentation for non-local broker authentication and production guidance
+- [ ] Add richer broker security options if certificate-based TLS settings are required
+- [ ] Decide on packaging/versioning strategy for NuGet distribution
+- [ ] Add more operational guidance around monitoring, replay, and dead-letter reprocessing
 
 ## Proposed Deliverables
 
@@ -155,12 +158,36 @@ services.AddKafkaAdapter(options =>
 services.AddKafkaHandler<OrderSubmitted, OrderSubmittedHandler>(
     topic: "orders",
     consumerGroup: "orders-consumer",
-    registration =>
+    options =>
     {
-        registration.MaxRetryAttempts = 3;
-        registration.RetryDelay = TimeSpan.FromSeconds(1);
-        registration.DeadLetterTopic = "orders.dlq";
+        options.MaxRetryAttempts = 3;
+        options.RetryDelay = TimeSpan.FromSeconds(1);
+        options.DeadLetterTopic = "orders.dlq";
     });
+```
+
+If you prefer to build options up front instead of registering handlers through DI extensions:
+
+```csharp
+var kafkaOptions = new KafkaAdapterOptions
+{
+    BootstrapServers = "localhost:9092",
+    ClientId = "my-app"
+};
+
+kafkaOptions.Producer.DefaultTopic = "orders";
+kafkaOptions.AddConsumer<OrderSubmitted, OrderSubmittedHandler>(
+    topic: "orders",
+    consumerGroup: "orders-consumer",
+    configure: options =>
+    {
+        options.MaxRetryAttempts = 3;
+        options.RetryDelay = TimeSpan.FromSeconds(1);
+        options.DeadLetterTopic = "orders.dlq";
+    });
+
+services.AddKafkaAdapter(kafkaOptions);
+services.AddScoped<OrderSubmittedHandler>();
 ```
 
 Publish a message:
@@ -192,6 +219,71 @@ public sealed class OrderSubmittedHandler : IMessageHandler<OrderSubmitted>
 }
 ```
 
+## Failure Semantics
+
+Current consumer behavior:
+
+- If a handler succeeds and `AutoCommit` is `false`, the adapter commits the Kafka offset after handling.
+- If deserialization fails, the adapter does not retry in-process. It sends the message to the dead-letter topic if one is configured; otherwise that consumer loop stops.
+- If the handler throws, the adapter retries in-process up to `MaxRetryAttempts` with exponential backoff based on `RetryDelay`.
+- If all retries fail and a dead-letter topic is configured, the adapter publishes a `KafkaDeadLetterMessage` and then commits the original offset.
+- If all retries fail and no dead-letter topic is configured, that consumer loop stops without committing the failed message.
+
+What this does not guarantee:
+
+- Exactly-once delivery
+- Global ordering beyond Kafka partition semantics
+- Distributed retries across processes
+- Automatic replay or re-drive of dead-lettered messages
+
+## Authentication
+
+Local development usually uses plaintext:
+
+```csharp
+services.AddKafkaAdapter(options =>
+{
+    options.BootstrapServers = "localhost:9092";
+    options.ClientId = "my-app";
+});
+```
+
+For SASL/PLAIN over TLS:
+
+```csharp
+services.AddKafkaAdapter(options =>
+{
+    options.BootstrapServers = "your-broker:9093";
+    options.ClientId = "my-app";
+    options.Security.Protocol = KafkaSecurityProtocol.SaslSsl;
+    options.Security.SaslMechanism = KafkaSaslMechanism.Plain;
+    options.Security.Username = "my-username";
+    options.Security.Password = "my-password";
+});
+```
+
+For SASL/SCRAM over TLS:
+
+```csharp
+services.AddKafkaAdapter(options =>
+{
+    options.BootstrapServers = "your-broker:9093";
+    options.ClientId = "my-app";
+    options.Security.Protocol = KafkaSecurityProtocol.SaslSsl;
+    options.Security.SaslMechanism = KafkaSaslMechanism.ScramSha512;
+    options.Security.Username = "my-username";
+    options.Security.Password = "my-password";
+});
+```
+
+## Production Notes
+
+- Keep `BootstrapServers`, usernames, and passwords in configuration or secret storage rather than source code.
+- Use `KafkaSecurityProtocol.SaslSsl` or `KafkaSecurityProtocol.Ssl` for remote brokers unless you explicitly control a trusted plaintext network.
+- Decide whether stopping a consumer loop on an unrecoverable failure is acceptable for your service model before using the current defaults in production.
+- Provision dead-letter topics explicitly and monitor them; the adapter publishes DLQ messages but does not re-drive them.
+- Integration tests in this repo validate the local broker path, not a production cluster topology.
+
 ## Next Step
 
-Refine the public API surface and broaden the documentation as the library hardens.
+Decide how far to take production hardening, especially packaging and advanced broker security support.

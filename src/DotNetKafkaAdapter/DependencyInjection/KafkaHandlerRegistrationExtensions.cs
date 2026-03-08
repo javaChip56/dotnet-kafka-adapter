@@ -10,7 +10,7 @@ public static class KafkaHandlerRegistrationExtensions
         this IServiceCollection services,
         string topic,
         string consumerGroup,
-        Action<KafkaConsumerRegistration>? configure = null)
+        Action<KafkaHandlerOptions>? configure = null)
         where THandler : class, IMessageHandler<TMessage>
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -19,19 +19,7 @@ public static class KafkaHandlerRegistrationExtensions
 
         services.AddOptions<KafkaAdapterOptions>();
         services.TryAddScoped<THandler>();
-        services.Configure<KafkaAdapterOptions>(options =>
-        {
-            var registration = new KafkaConsumerRegistration
-            {
-                Topic = topic,
-                ConsumerGroup = consumerGroup,
-                MessageType = typeof(TMessage),
-                HandlerType = typeof(THandler)
-            };
-
-            configure?.Invoke(registration);
-            options.Consumers.Add(registration);
-        });
+        services.Configure<KafkaAdapterOptions>(options => options.AddConsumer<TMessage, THandler>(topic, consumerGroup, configure));
 
         return services;
     }

@@ -69,10 +69,11 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Refined public-release package metadata
 - [x] Added operational guidance for monitoring, replay, and dead-letter reprocessing
 - [x] Added MIT license metadata for NuGet publication
+- [x] Added GitHub Actions release automation for GitHub Releases and NuGet publishing
 
 ### To Do
 
-- [ ] Decide whether to add CI or release automation for package publication
+- [ ] Decide whether to split build/test CI from release automation into separate workflows
 
 ## Proposed Deliverables
 
@@ -200,6 +201,41 @@ If you want symbol packages as well, include them when packing:
 ```bash
 dotnet pack src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj -c Release -o artifacts/packages /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg
 ```
+
+## GitHub Release Automation
+
+The repository includes a release workflow at [.github/workflows/release.yml](D:\Research\dotnet-kafka-adapter\.github\workflows\release.yml).
+
+It will:
+
+- restore, build, and run the integration test suite
+- start both the plaintext and TLS local Kafka stacks in Docker
+- generate the local TLS certificates used by the TLS integration test
+- pack `.nupkg` and `.snupkg` artifacts
+- create a GitHub Release for the version tag
+- push the package to NuGet when the `NUGET_API_KEY` repository secret is configured
+
+### Triggering A Release
+
+The release workflow runs automatically when you push a tag that starts with `v`, for example:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+You can also run it manually from GitHub Actions with:
+
+- `version`
+- `publish_to_nuget`
+
+### Required GitHub Secret
+
+To publish to NuGet from GitHub Actions, add this repository secret:
+
+- `NUGET_API_KEY`
+
+If that secret is not present, the workflow will still build, test, pack, and create the GitHub Release, but it will skip the NuGet push step.
 
 ## Usage
 

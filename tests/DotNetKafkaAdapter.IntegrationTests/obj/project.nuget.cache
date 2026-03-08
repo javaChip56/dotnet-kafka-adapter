@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "4IqNtTo2tlw=",
+  "dgSpecHash": "fGr3OZE4JZ8=",
   "success": true,
   "projectFilePath": "D:\\Research\\dotnet-kafka-adapter\\tests\\DotNetKafkaAdapter.IntegrationTests\\DotNetKafkaAdapter.IntegrationTests.csproj",
   "expectedPackageFiles": [

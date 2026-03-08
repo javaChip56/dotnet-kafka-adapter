@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v8.0": {
-      "DotNetKafkaAdapter/1.0.0": {
+      "DotNetKafkaAdapter/0.1.0": {
         "dependencies": {
           "Confluent.Kafka": "2.13.2",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3",
@@ -258,7 +258,7 @@
     }
   },
   "libraries": {
-    "DotNetKafkaAdapter/1.0.0": {
+    "DotNetKafkaAdapter/0.1.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -5,7 +5,7 @@
   },
   "projects": {
     "D:\\Research\\dotnet-kafka-adapter\\src\\DotNetKafkaAdapter\\DotNetKafkaAdapter.csproj": {
-      "version": "1.0.0",
+      "version": "0.1.0",
       "restore": {
         "projectUniqueName": "D:\\Research\\dotnet-kafka-adapter\\src\\DotNetKafkaAdapter\\DotNetKafkaAdapter.csproj",
         "projectName": "DotNetKafkaAdapter",

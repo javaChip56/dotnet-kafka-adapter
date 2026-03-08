@@ -9,7 +9,7 @@
       "DotNetKafkaAdapter.IntegrationTests/1.0.0": {
         "dependencies": {
           "Confluent.Kafka": "2.13.2",
-          "DotNetKafkaAdapter": "1.0.0",
+          "DotNetKafkaAdapter": "0.1.0",
           "Microsoft.Extensions.Hosting": "10.0.3",
           "Microsoft.NET.Test.Sdk": "17.8.0",
           "coverlet.collector": "6.0.0",
@@ -1585,7 +1585,7 @@
         }
       },
       "xunit.runner.visualstudio/2.5.3": {},
-      "DotNetKafkaAdapter/1.0.0": {
+      "DotNetKafkaAdapter/0.1.0": {
         "dependencies": {
           "Confluent.Kafka": "2.13.2",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3",
@@ -1594,8 +1594,8 @@
         },
         "runtime": {
           "DotNetKafkaAdapter.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
+            "assemblyVersion": "0.1.0",
+            "fileVersion": "0.1.0.0"
           }
         }
       }
@@ -2461,7 +2461,7 @@
       "path": "xunit.runner.visualstudio/2.5.3",
       "hashPath": "xunit.runner.visualstudio.2.5.3.nupkg.sha512"
     },
-    "DotNetKafkaAdapter/1.0.0": {
+    "DotNetKafkaAdapter/0.1.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

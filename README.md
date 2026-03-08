@@ -34,7 +34,7 @@ The first version does not need to solve everything:
 
 ## Status
 
-This repository now contains the initial solution scaffold, public contracts, producer and consumer implementations, DI registration, typed handler registration helpers, retry/dead-letter behavior, and live integration tests against a local Kafka broker.
+This repository now contains the initial solution scaffold, public contracts, producer and consumer implementations, DI registration, typed handler registration helpers, retry/dead-letter behavior, a runnable sample app, and live integration tests against a local Kafka broker.
 
 ## Checklist
 
@@ -59,11 +59,13 @@ This repository now contains the initial solution scaffold, public contracts, pr
 - [x] Added retry behavior and dead-letter strategy
 - [x] Added local development setup for Kafka
 - [x] Added integration tests against a local Kafka instance
+- [x] Added sample application showing publish/consume usage
+- [x] Added usage documentation and configuration examples
 
 ### To Do
 
-- [ ] Add sample application showing publish/consume usage
-- [ ] Add usage documentation and configuration examples
+- [ ] Refine the public API surface as the adapter hardens
+- [ ] Expand documentation for non-local broker authentication and production guidance
 
 ## Proposed Deliverables
 
@@ -111,6 +113,85 @@ Run the Kafka integration tests against the local broker with:
 dotnet test tests/DotNetKafkaAdapter.IntegrationTests/DotNetKafkaAdapter.IntegrationTests.csproj
 ```
 
+## Sample App
+
+A runnable sample lives in [samples/DotNetKafkaAdapter.SampleApp](D:\Research\dotnet-kafka-adapter\samples\DotNetKafkaAdapter.SampleApp).
+
+Run it against the local broker with:
+
+```bash
+dotnet run --project samples/DotNetKafkaAdapter.SampleApp/DotNetKafkaAdapter.SampleApp.csproj
+```
+
+Optional environment variables:
+
+- `KAFKA_BOOTSTRAP_SERVERS` defaults to `localhost:9092`
+- `KAFKA_TOPIC` defaults to `sample.orders`
+- `KAFKA_CONSUMER_GROUP` defaults to `sample.orders.consumer`
+- `KAFKA_DEAD_LETTER_TOPIC` defaults to `<topic>.dlq`
+
+The sample app:
+
+- creates the sample topic and dead-letter topic if they do not exist
+- starts the adapter consumer hosted service
+- publishes one `OrderSubmitted` message
+- logs the consumed message and stops the host
+
+## Usage
+
+Typical registration in an application:
+
+```csharp
+using DotNetKafkaAdapter.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+
+services.AddKafkaAdapter(options =>
+{
+    options.BootstrapServers = "localhost:9092";
+    options.ClientId = "my-app";
+    options.Producer.DefaultTopic = "orders";
+});
+
+services.AddKafkaHandler<OrderSubmitted, OrderSubmittedHandler>(
+    topic: "orders",
+    consumerGroup: "orders-consumer",
+    registration =>
+    {
+        registration.MaxRetryAttempts = 3;
+        registration.RetryDelay = TimeSpan.FromSeconds(1);
+        registration.DeadLetterTopic = "orders.dlq";
+    });
+```
+
+Publish a message:
+
+```csharp
+await publisher.PublishAsync(
+    "orders",
+    new OrderSubmitted("order-123", "customer-42", 42.50m),
+    new PublishOptions
+    {
+        Key = "order-123",
+        MessageId = "order-123"
+    },
+    cancellationToken);
+```
+
+Handle a consumed message:
+
+```csharp
+public sealed class OrderSubmittedHandler : IMessageHandler<OrderSubmitted>
+{
+    public Task HandleAsync(
+        MessageContext context,
+        OrderSubmitted message,
+        CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+}
+```
+
 ## Next Step
 
-Add a sample application and usage examples.
+Refine the public API surface and broaden the documentation as the library hardens.

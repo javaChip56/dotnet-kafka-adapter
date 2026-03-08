@@ -9,7 +9,7 @@ internal static class KafkaClientConfigFactory
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(security);
 
-        config.SecurityProtocol = security.Protocol switch
+        var securityProtocol = security.Protocol switch
         {
             KafkaSecurityProtocol.Plaintext => SecurityProtocol.Plaintext,
             KafkaSecurityProtocol.Ssl => SecurityProtocol.Ssl,
@@ -17,6 +17,16 @@ internal static class KafkaClientConfigFactory
             KafkaSecurityProtocol.SaslSsl => SecurityProtocol.SaslSsl,
             _ => throw new ArgumentOutOfRangeException(nameof(security.Protocol), security.Protocol, null)
         };
+
+        config.SecurityProtocol = securityProtocol;
+
+        if (securityProtocol is not SecurityProtocol.SaslPlaintext and not SecurityProtocol.SaslSsl)
+        {
+            config.SaslMechanism = null;
+            config.SaslUsername = null;
+            config.SaslPassword = null;
+            return;
+        }
 
         config.SaslMechanism = security.SaslMechanism switch
         {

@@ -808,7 +808,7 @@
           "buildTransitive/net8.0/System.Text.Json.targets": {}
         }
       },
-      "DotNetKafkaAdapter/1.0.0": {
+      "DotNetKafkaAdapter/0.1.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
@@ -1965,7 +1965,7 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "DotNetKafkaAdapter/1.0.0": {
+    "DotNetKafkaAdapter/0.1.0": {
       "type": "project",
       "path": "../../src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj",
       "msbuildProject": "../../src/DotNetKafkaAdapter/DotNetKafkaAdapter.csproj"
@@ -1974,7 +1974,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Confluent.Kafka >= 2.13.2",
-      "DotNetKafkaAdapter >= 1.0.0",
+      "DotNetKafkaAdapter >= 0.1.0",
       "Microsoft.Extensions.Hosting >= 10.0.3"
     ]
   },

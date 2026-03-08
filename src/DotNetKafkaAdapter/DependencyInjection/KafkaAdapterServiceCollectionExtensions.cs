@@ -2,6 +2,7 @@ using System.Text.Json;
 using DotNetKafkaAdapter.Abstractions;
 using DotNetKafkaAdapter.Consuming;
 using DotNetKafkaAdapter.Configuration;
+using DotNetKafkaAdapter.Diagnostics;
 using DotNetKafkaAdapter.Producing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -57,7 +58,9 @@ public static class KafkaAdapterServiceCollectionExtensions
 
     private static IServiceCollection EnsureKafkaOptions(this IServiceCollection services)
     {
-        services.AddOptions<KafkaAdapterOptions>();
+        services.AddOptions<KafkaAdapterOptions>().ValidateOnStart();
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<IValidateOptions<KafkaAdapterOptions>, KafkaAdapterOptionsValidator>());
         services.TryAddSingleton(sp => sp.GetRequiredService<IOptions<KafkaAdapterOptions>>().Value);
 
         return services;
